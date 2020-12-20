@@ -12,7 +12,7 @@ tags:
 
 # [EnclaveCache: A Secure and Scalable Key-value Cache in Multi-tenant Clouds using Intel SGX](https://dl.acm.org/doi/10.1145/3361525.3361533)
 
-本文
+本文提出基于Intel SGX的云环境下高性能的租户间安全隔离机制。
 
 ## 背景和问题：
 
@@ -32,11 +32,11 @@ tags:
 
 
 
-近年来一些研究人员尝试使用可信硬件，如Intel SGX为运行在云上的应用提供安全保护。SGX提拱的可信执行环境（Enclave）能阻止包括（主机）操作系统在内的特权系统代码的访问。已有的研究比如Haven，SCONE,Graphene-SGX允许未经修改的应用安全地运行在云环境中。**现有基于SGX的机制需要将完整的应用和一个库操作系统或libc库放进enclave内**，这样做会带来两个问题：1）导致较大的[可信计算库](https://en.wikipedia.org/wiki/Trusted_computing_base)（trusted computing base），从而增加系统安全风险的概率；2）SGX的大小有限（128MB），不足以将完整的KV缓存应用都存放入enclave内，当要通过SGX安全的访问位于enclave以外的数据时，要先将一些内存页面从enclave内交换出去，然后将要读取的数据映射到被交换出去的enclave内存页面。这一过程涉及到加解密、完整性验证、内存映射更新和TLB shootdown等步骤，开销很高。
+近年来一些研究人员尝试使用可信硬件，如Intel SGX为运行在云上的应用提供安全保护。SGX提拱的可信执行环境（Enclave）能阻止包括（主机）操作系统在内的特权系统代码的访问。已有的研究比如Haven，SCONE,Graphene-SGX允许未经修改的应用安全地运行在云环境中。**现有基于SGX的机制需要将完整的应用和一个库操作系统或libc库放进enclave内**，这样做会带来两个问题：1）导致较大的[可信计算库](https://en.wikipedia.org/wiki/Trusted_computing_base)（trusted computing base，TCB），从而增加系统安全风险的概率；2）SGX的大小有限（128MB），不足以将完整的KV缓存应用都存放入enclave内，当要通过SGX安全的访问位于enclave以外的数据时，要先将一些内存页面从enclave内交换出去，然后将要读取的数据映射到被交换出去的enclave内存页面。这一过程（称为EPC paging）涉及到加解密、完整性验证、内存映射更新和TLB shootdown等步骤，开销很高。
 
 
 
-## 研究动机：选择将哪一部分数据放进enclave内以防止其他租户的攻安全攻击。
+## 研究动机：选择将一个租户的哪一部分数据放进enclave内以防止其他租户的攻安全攻击。
 
 <center>
 
@@ -45,7 +45,15 @@ tags:
 图 2  不同的基于enclave的多租户缓存设计
 </center>
 
-如图2所示，有三种不同的基于SGX enclave的安全多租户缓存设计，本问对每一种进行了分析以确定哪一种能最佳地解决上述问题。
+如图2所示，有三种不同的基于SGX enclave的安全多租户缓存隔离方案，本文对每一种进行了分析以确定哪一种能最佳地解决上述问题。
 
-- apllication enclave: 如图2（a）所示，租户在应用级被完全隔离，每个租户有独立的基于enclave的容器，整个KV 缓存应用和依赖库都运行在对应租户的容器内。这样的设计有SCONE。这种设计具有最佳的隔离性，但是其安全和可扩展性并不好。
+- Apllication Enclave: 如图2（a）所示，租户在应用级被完全隔离，每个租户有独立的基于enclave的容器，整个KV 缓存应用和依赖库都运行在对应租户的容器内。这样的设计有SCONE。这种设计具有最佳的隔离性，但是其安全和可扩展性并不好。从安全角度来说，由于将整个应用和所有依赖库放进了enclave，TCB增加，从而增加了安全漏洞发生的范围。从可扩展性方面来说，系统要为每一个租户维护一个独立的软件堆栈，包括Redis实例及其依赖库、libc库，导致资源竞争和维护开销增加。
   
+- Data Enclave: 如图2（b）所示，由于所有的租户都可以共享enclave内的软件堆栈，只有租户的私有数据需要安全隔离，因此相比于保持原有应用程序不变，第二种方案实现了一个自定义缓存应用程序，该应用程序使用enclave仅将各租户的私有数据进行隔离。因为只需要一个redis实例，这种方案的可扩展性较好。但是租户的数据量可能会超过enclave的大小，从而需要使用开销很高的EPC paging。
+  
+- Secret Enclave: 第二种方案存在租户数据量要小于enclave中可使用的内存容量的限制。为此，提出第三钟方案进行优化：仅在每个enclave内存放相应租户的敏感数据和关键代码以减少enclave内存占用。如图2（c）所示，每个租户有一个专有的enclave，租户将一个特有的加密秘钥存放进自己的enclave内，用于对租户的数据进行加解密。租户的数据可以加密后存放在enclave外。
+  
+基于上述分析，本文采用secret enclave方案以保证高性能和较高的租户间安全隔离性。
+
+## 设计：
+
