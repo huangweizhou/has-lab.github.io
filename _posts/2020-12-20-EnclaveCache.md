@@ -45,4 +45,6 @@ tags:
 图 2  不同的基于enclave的多租户缓存设计
 </center>
 
-有三种
+如图2所示，有三种不同的基于SGX enclave的安全多租户缓存设计，本问对每一种进行了分析以确定哪一种能最佳地解决上述问题。
+
+- apllication enclave:
