@@ -57,3 +57,23 @@ tags:
 
 ## 设计：
 
+<center>
+
+<img src="../images/EnclaveCache-图3.png" width="65%" height="65%" />
+
+图 3  EnclaveCache架构
+</center>
+
+### EnclaveCache架构:
+  
+如图3所示，每个最后通过clinet library连接到一个专有的secret enclave。网络纯属的保密性由TLS保证。Encryption Engine负责加密来自TLS server的请求并转发给Request Handler。Encryption Engine使用的encryption key由KRM从KDC中获取。KDC运行在一个具有SGX保护的平台上，由APM和KSM组成。KSM用于阻止对租户的的encryption key的非法访问。
+
+
+
+
+## 实验：
+基于真实的硬件平台实现：
+
+**EnclaveCache:** SGX-capable Intel Core I7-7700K 处理器
+
+**客户端机器:** Intel Xeon server
