@@ -58,7 +58,7 @@ tags:
 
 - Native THP Migration : 通过修改内核对大页在不同内存节点间的（THP）迁移提供支持，减少TLB shootdown的次数，并提升单次页迁移的带宽利用率。
 
-- parallized THP Migration : 当前Linux页迁移是单线程的并且每次页迁移的数据量被限制在4KB，为了解决这一限制，本文修改了move_pages()系统调用， 实现了多线程并发大页迁移机制。
+- Parallized THP Migration : 当前Linux页迁移是单线程的并且每次页迁移的数据量被限制在4KB，为了解决这一限制，本文修改了move_pages()系统调用， 实现了多线程并发大页迁移机制。
 
 - Concurrent Multi-page Nigration : 如图3（a）所示，现有Linux在迁移多个页时实现需要串行化页拷贝，无法充分利用硬件带宽并且造成较高延时。如图3（b）所示，本文提出将图2中的第三步第三步独立出来，并用多个内核线程并发的完成page copy以实现并行页迁移。
 
