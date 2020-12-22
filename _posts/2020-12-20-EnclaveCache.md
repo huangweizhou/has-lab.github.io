@@ -12,7 +12,7 @@ tags:
 
 # [EnclaveCache: A Secure and Scalable Key-value Cache in Multi-tenant Clouds using Intel SGX](https://dl.acm.org/doi/10.1145/3361525.3361533)
 
-本文提出基于Intel SGX的云环境下高性能的租户间安全隔离机制。
+本文提出基于Intel SGX的云环境多租户下的高性能租户间安全隔离机制。
 
 ## 背景和问题：
 
