@@ -57,19 +57,19 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 图 3  观察2：批处理越多，平均处理延时越低
 </center>
 
-3. 观察3：Page eviction位于关键路径。
+3. 观察3：Page eviction位于关键路径。如图4所示，为了避免页B覆写正在被逐出的页X，page eviction策略选择将page eviction串行化。
    
   <center>
 
 <img src="../images/batch-aware-eviction.png" width="65%" height="65%" />
 
-图 4  观察3：page eviction位于关键路径。如图4所示，为了避免页B覆写正在被逐出的页X，page eviction策略选择将page eviction串行化。
+图 4  观察3：page eviction位于关键路径。
 </center> 
 
 ## 设计： 
 
 **设计思想：**
-- Fault handling：通过提前执行上下文切换，使不同批次的page fault能够被交错地完成，相比于串行化不同批次的page fault处理，显著提高page fault平均延时；
+- Fault handling：通过提前执行上下文切换，使不同批次的page fault能够被交错地完成，相比于串行化不同批次的page fault处理，降低page fault平均延时；
 
 - Page eviction：提前完成page eviction，从而将page eviction移除出page miration的关键路径。
 
@@ -79,15 +79,27 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 1. Thread Oversubscription (TO)
 通过增加批处理大小（一批次处理的page fault数量），有效地降低GPU平均page fault处理时间
 
+
+
+<center>
+
+<img src="../images/batch-aware-TO.png" width="65%" height="65%" />
+
+图 5  thread oversubscription机制
+</center> 
+
+
+
+
   <center>
 
 <img src="../images/batch-aware-batch.png" width="95%" height="65%" />
 
-图 X  thread oversubscription增加批处理大小
+图 6  thread oversubscription增加批处理大小原理
 </center> 
 
 
-2. Unobtrusive Eviction (UE)
+1. Unobtrusive Eviction (UE)
 将page eviction移出关键路径（软件方法）
 
 
