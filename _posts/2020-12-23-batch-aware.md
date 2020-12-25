@@ -23,5 +23,25 @@ GPU已经成为服务器和数据中心中重要的计算平台之一。传统�
 
 为了解决访问内存受限的问题，新型GPU支持统一虚拟内存（UVM）技术，UVM为CPU和GPU提供了统一的虚拟内存地址空间，数据能够通过请求分页（demand paging）机制自动地在CPU或GPU节点之间迁移，从而使得GPU能访问CPU内存。
 
-问题在于，GPU在UVM下使用demand paging依赖于缺页异常（page fault），而缺页异常的延时非常高（20-50us）。
+**问题在于**，GPU在UVM下使用demand paging依赖于缺页异常（page fault），而缺页异常的延时非常高（20-50us）。
 此外，GPU会比CPU更频繁地访问内存，进一步放大demand paging的性能影响。
+
+
+
+## 设计： 
+
+**设计思想：**
+- Fault handling：通过提前执行上下文切换，使不同批次的page fault能够被交错地完成，相比于串行化不同批次的page fault处理，显著提高page fault平均延时；
+- Page eviction：提前完成page eviction，从而将page eviction移除出page miration的关键路径。
+
+
+## 实验：
+
+
+
+<center>
+
+<img src="../images/batch-aware-evaluation.png" width="65%" height="65%" />
+
+图 X  仿真平台
+</center>
