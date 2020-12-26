@@ -57,7 +57,7 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 图 3  观察2：批处理越多，平均处理延时越低
 </center>
 
-3. 观察3：Page eviction位于关键路径。如图4所示，为了避免页B覆写正在被逐出的页X，page eviction策略选择将page eviction串行化。
+1. 观察3：Page eviction位于关键路径。如图4所示，为了避免页A覆写页X，只有当X被逐出后才迁移A的数据到GPU内存。
    
   <center>
 
@@ -106,14 +106,25 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 
 
 2. Unobtrusive Eviction (UE)
-将page eviction移出关键路径（软件方法）
+为了降低批处理第二阶段（page migration）的延时，对页分配和页迁移的时序进行了修改。
+本文修改了GPU runtime并增加了一个GPU 内存状态追踪器，如图7所示，当GPU MMU产生了一个page fault时，top-half ISR进行响应（①），top-half ISR通过检查GPU内存状态追踪器，判断内存使用是否达到上限，如果达到上限，则发出提前逐出请求（②③），最后执行bottom-half ISR（④）。由于批处理过程第一阶段的延时是几十微秒级别，第一个内存页的逐出在页迁移开始之前已经完成。如果后续还需要逐出内存页，bottom-half ISR会调度后续的page eviction和page migration。
+
+图10展示了page eviction的时序图，当开始批处理page fault时，如果内存容量到达上限，就开始一个4KB页的page eviction（①），在页X被逐出后，更新页表（②），因此页A的迁移无需page eviction开销（③），页Y的逐出可以通过DMA双向传输与页A的迁移同时完成。
+
+ <center>
+
+<img src="../images/batch-aware-图7.png" width="65%" height="65%" />
+
+图 7 unobtrusive eviction执行逻辑
+</center> 
+
 
 
   <center>
 
 <img src="../images/batch-aware-neweviction.png" width="65%" height="65%" />
 
-图 X unobtrusive eviction执行逻辑
+图 8 unobtrusive eviction时序
 </center> 
 
 ## 实验：
@@ -124,5 +135,5 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 
 <img src="../images/batch-aware-evaluation.png" width="65%" height="65%" />
 
-图 X  仿真平台配置
+图 9  仿真平台配置
 </center>
