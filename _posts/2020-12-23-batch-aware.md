@@ -69,7 +69,7 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 ## 设计： 
 
 **设计思想：**
-- Fault handling：通过提前执行上下文切换，使不同批次的page fault能够被交错地完成，相比于串行化不同批次的page fault处理，降低page fault平均延时；
+- Fault handling：通过执行上下文切换，使不同批次的page fault能够被交错地完成，增加批处理大小（一批次处理的page fault数量），有效地降低GPU平均page fault处理时间。
 
 - Page eviction：提前完成page eviction，从而将page eviction移除出page miration的关键路径。
 
@@ -77,7 +77,13 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 
 设计：
 1. Thread Oversubscription (TO)
-通过增加批处理大小（一批次处理的page fault数量），有效地降低GPU平均page fault处理时间
+   
+要增加批处理的大小就是要增加同时执行的线程数，一种直观的方法是为GPU SM分配更多地[thread block](https://en.wikipedia.org/wiki/Thread_block_(CUDA_programming))，但是一个SM能同时运行的thread block数受物理资源的限制。因此本文基于VT（virtual thread）技术，为每个SM分配尽可能多的thread block（超过物理调度资源限制，如程序计数器和SIMT stack），并将thread block划分为活跃和挂起两种状态，通过上下文切换，保证任何一个时刻正在运行的thrad block不会超过物理调度资源限制。
+
+如图5所示，在GPU开始运行时就为每个SM分配尽可能多的thread block（①），额外添加的thread block（图中inactive）一开始处于挂起状态，当active thread block中的所有warp（GPU基本执行单元）都因为page fault而被挂起后，GPU通过上下文切换执行inactive thread block（②）。
+考虑到TO机制会增加page fault产生频率，造成过早的page eviction。为了避免这一负面影响，GPU runtime会统计page eviction rate，一旦rate降低到某个阈值没那么就会阻止上下文切换（③）。
+
+图6说明了TO机制能够增加批处理大小的原理。假设物理资源限制一个SM同时只能执行一个thread block（TB），页A,B,C由TB1访问，D由TB2访问。当TB1的所有warp都被挂起后（即访问页C产生page fault后），通过上下文切换执行TB2，因此B,C,D的apge fault可以一起被处理，即增加批处理大小。
 
 
 
@@ -99,7 +105,7 @@ GPU为了摊销PCIe总线传输和异常处理系统调用的开销，每次处�
 </center> 
 
 
-1. Unobtrusive Eviction (UE)
+2. Unobtrusive Eviction (UE)
 将page eviction移出关键路径（软件方法）
 
 
