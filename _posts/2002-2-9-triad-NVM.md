@@ -22,9 +22,13 @@ authentication code（MAC））。
 **问题在于**，如何同时实现数据安全保护，快速的崩溃/重启后的数据恢复和低延迟的数据及安全元数据的持久化。
 
 
-## 研究动机：安全元数据的崩溃一致性机制对NVMM的性能影响
+## 研究动机：安全元数据的崩溃一致性（crash consistency）机制对NVMM的性能影响
     
+图1说明了在对安全元数据据页进行崩溃一致性保护时的系统吞吐率相比没有对安全元数据进行保护时的下降情况（最严重的的性能下降高达9.4X）。性能下降的原因是为了持久化安全元数据产生了额外的写操作。
 
+由于持久化安全元数据会带来较大开销，许多用户放弃对其进行崩溃一致性保护，但是这样做会导致系统存在安全漏洞或数据无法在崩溃后恢复。
+
+为了解决这一问题，本文定义了安全持久系统的要求，并研究了不同方案对系统性能、恢复时间和恢复能力的影响。 
 <center>
 
 <img src="../images/triad-NVM-motivation.png" width="75%" />
@@ -32,6 +36,9 @@ authentication code（MAC））。
 图 1 持久化安全元数据的性能开销
 
 </center> 
+
+#### 崩溃一致性： A backup or snapshot is crash consistent if all of the interrelated data components are as they were (write-order consistent) at the instant of the crash. To better understand this type of consistency, imagine the status of the data on your PC’s hard drive after a power outage or similar event. A crash-consistent backup is usually sufficient for nondatabase operating systems and applications like file servers, DHCP servers, print servers, and so on.
+
 
 ## 设计：
 ### 威胁模型：
