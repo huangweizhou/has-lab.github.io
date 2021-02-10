@@ -22,3 +22,17 @@
 [PCIe扫盲系列博文连载目录篇（第五阶段）](http://blog.chinaaet.com/justlxy/p/5100061871)
 ### 精选 （选自第二阶段）
 [PCIe扫盲——基地址寄存器（BAR）详解](http://blog.chinaaet.com/justlxy/p/5100053320)
+
+
+
+
+[来源](https://www.intel.cn/content/www/cn/zh/programmable/documentation/lbl1415138844137.html)
+
+<img src="../images/PCIe-MMIO-64bit.png" width="75%" height="65%" />
+
+
+
+
+
+
+
