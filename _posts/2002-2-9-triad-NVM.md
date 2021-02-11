@@ -110,9 +110,37 @@ NVM registers once a crash is detected.
 
 ## 设计：
 ### 威胁模型：
-略
+We assume a single processor chip system where the chip boundary forms the security boundary. The root of trust must be self contained in the processor chip, including any keys and root of the Merkle Tree.
 
+We assume attackers capable of performing passive reading of
+memory values from the NVMM and snooping the bus connecting
+processor and memory. We also assume attackers capable of changing values stored in the NVMM, either while the computer system
+is powered on and operational, or across episodes of power events.
+Attackers may achieve that either through physically tampering
+the memory (e.g. using heat gun or electric currents) or by unmounting it from the target system and mounting it to a different
+system. However, our goal is to ensure confidentiality and integrity
+of memory data, but not its availability. Hence, denial of service is
+not a focus of this paper.
 
+We also assume that the entire main memory is protected, not
+just a small part of it that is within a security enclave. Hence, our
+protection goal is different from that of Intel SGX, and requires the
+entire memory to be protected.
+
+### 设计目标：
+
+• Preservation of security guarantees. Memory encryption and integrity verification should guarantee confidentiality and integrity of data, even with memory non-volatility.
+
+• Data recoverability. NVMM may be divided into persistent
+and non-persistent regions, where the programmer keeps
+permanent data in the persistent region and temporary data
+in the non-persistent region. Data in a persistent region
+should be recoverable across crashes and system reboots.
+At the same time, NVMM should not get in the way of not
+wanting to recover data from non-persistent region.
+
+• Fast persistence and recovery. Persistence should not significantly slow down execution. Post-crash/reboot recovery
+should be relatively fast to ensure high availability
 
 ## 实验：
 GEM5(FS mode)， PMDK（管理NVMM）
