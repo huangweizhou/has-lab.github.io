@@ -110,12 +110,12 @@ NVM registers once a crash is detected.
 
 ## 设计：
 ### 威胁模型：
-
+略
 
 
 
 ## 实验：
-GEM5(fs)， PMDK
+GEM5(FS mode)， PMDK（管理NVMM）
 
 ## 新颖性： 
 在混合内存架构下，结合了安全性和持久化提出了新的问题，并通过实验数据educate读者。
