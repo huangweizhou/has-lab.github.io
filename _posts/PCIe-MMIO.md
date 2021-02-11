@@ -8,7 +8,7 @@
 
 [老男孩读PCIe之六：配置和地址空间](http://www.ssdfans.com/?p=8210)
 
-
+[PCI总线的桥与配置](https://example61560.wordpress.com/2016/06/30/pcipcie-%E6%80%BB%E7%BA%BF%E6%A6%82%E8%BF%B02/)
 
 ## PCIe基础知识系列博客
 [PCIe扫盲系列博文连载目录篇(第一阶段)](http://blog.chinaaet.com/justlxy/p/5100053251)
