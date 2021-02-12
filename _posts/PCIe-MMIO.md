@@ -10,6 +10,10 @@
 
 [PCI总线的桥与配置](https://example61560.wordpress.com/2016/06/30/pcipcie-%E6%80%BB%E7%BA%BF%E6%A6%82%E8%BF%B02/)
 
+
+[64bitBAR配置](http://www.applistar.com/wp-content/uploads/apps/PCIe%20DMA%20User%20Manual.pdf)
+
+
 ## PCIe基础知识系列博客
 [PCIe扫盲系列博文连载目录篇(第一阶段)](http://blog.chinaaet.com/justlxy/p/5100053251)
 

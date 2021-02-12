@@ -9,7 +9,7 @@ tags:
 ---
 
 # [Elastic Cuckoo Page Tables: Rethinking Virtual Memory Translation for Parallelism](http://skarlat2.web.engr.illinois.edu/publications/cuckoo_asplos20.pdf)
-注：本文仅对问题进行撰写，设计部分请自行阅读原文
+
 
 ## 背景和问题：
 新兴的内存密集型应用对内存的需求空前增加。这导致内存地址转换开销也随之增加。
